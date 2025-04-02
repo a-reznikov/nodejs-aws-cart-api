@@ -1,32 +1,29 @@
 import { NestFactory } from '@nestjs/core';
-import helmet from 'helmet';
+import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-
-let app: any;
+import * as serverless from 'serverless-http';
+import * as express from 'express';
 
 async function bootstrap() {
-  if (!app) {
-    app = await NestFactory.create(AppModule);
-    app.enableCors({
-      origin: (req, callback) => callback(null, true),
-    });
-    app.use(helmet());
-    await app.init();
-  }
-  return app;
+  const expressApp = express();
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressApp),
+  );
+
+  app.enableCors();
+
+  await app.init();
+
+  return serverless(expressApp);
 }
 
-export const handler = async (event: any, context: any) => {
-  const app = await bootstrap();
-  const expressApp = app.getHttpAdapter().getInstance();
+let server: any;
 
-  return new Promise((resolve, reject) => {
-    expressApp(event, context, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
+export const handler = async (event: any, context: any) => {
+  if (!server) {
+    server = await bootstrap();
+  }
+
+  return server(event, context);
 };

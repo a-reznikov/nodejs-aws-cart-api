@@ -1,24 +1,40 @@
-const path = require('path');
 const nodeExternals = require('webpack-node-externals');
+const path = require('path');
 
-module.exports = {
-  entry: './src/lambda.ts',
-  target: 'node',
-  externals: [nodeExternals()],
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
+const lazyImports = [
+  "@nestjs/microservices/microservices-module",
+  "@nestjs/websockets/socket-module",
+];
+
+module.exports = function (options, webpack) {
+  return {
+    ...options,
+    entry: ['./src/lambda.ts'],
+    target: 'node',
+    externals: [nodeExternals()],
+
+    output: {
+      ...options.output,
+      filename: 'lambda.js',
+      path: path.resolve(__dirname, 'dist'),
+      library: {
+        type: 'commonjs2',
+        export: 'handler'
+      }
+    },
+
+    plugins: [
+      ...options.plugins,
+      new webpack.IgnorePlugin({
+        checkResource(resource) {
+          return lazyImports.includes(resource);
+        },
+      }),
     ],
-  },
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-  },
-  output: {
-    filename: 'lambda.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
+
+    mode: 'production',
+    optimization: {
+      minimize: true
+    }
+  };
 };
