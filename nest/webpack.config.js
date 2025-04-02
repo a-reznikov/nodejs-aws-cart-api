@@ -18,8 +18,7 @@ module.exports = function (options, webpack) {
       filename: 'lambda.js',
       path: path.resolve(__dirname, 'dist'),
       library: {
-        type: 'commonjs2',
-        export: 'handler'
+        type: 'commonjs2'
       }
     },
 
