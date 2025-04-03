@@ -9,6 +9,8 @@ import {
   HttpStatus,
   HttpCode,
   BadRequestException,
+  ClassSerializerInterceptor,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../auth';
 import { Order, OrderService } from '../order';
@@ -26,6 +28,7 @@ export class CartController {
   ) {}
 
   // @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(BasicAuthGuard)
   @Get()
   async findUserCart(@Req() req: AppRequest): Promise<CartItemEntity[]> {
@@ -33,10 +36,11 @@ export class CartController {
       getUserIdFromRequest(req),
     );
 
-    return cart.items;
+    return cart.items.map((item) => new CartItemEntity(item));
   }
 
   // @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(BasicAuthGuard)
   @Put()
   async updateUserCart(
@@ -49,7 +53,7 @@ export class CartController {
       body,
     );
 
-    return cart.items;
+    return cart.items.map((item) => new CartItemEntity(item));
   }
 
   // @UseGuards(JwtAuthGuard)

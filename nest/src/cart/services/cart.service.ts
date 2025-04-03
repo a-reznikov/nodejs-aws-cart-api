@@ -4,8 +4,9 @@ import { Repository } from 'typeorm';
 import { CartEntity } from '../entities/cart.entity';
 import { CartItemEntity } from '../entities/cart-item.entity';
 import { randomUUID } from 'node:crypto';
-import { CartStatuses } from '../models';
+import { CartStatuses, Product } from '../models';
 import { PutCartPayload } from 'src/order/type';
+import { ProductEntity } from '../entities/product.entity';
 
 @Injectable()
 export class CartService {
@@ -14,12 +15,14 @@ export class CartService {
     private readonly cartRepository: Repository<CartEntity>,
     @InjectRepository(CartItemEntity)
     private readonly cartItemRepository: Repository<CartItemEntity>,
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
   ) {}
 
   async findByUserId(userId: string): Promise<CartEntity> {
     return this.cartRepository.findOne({
       where: { user_id: userId },
-      relations: ['items'],
+      relations: ['items', 'items.product'],
     });
   }
 
@@ -36,9 +39,11 @@ export class CartService {
 
   async findOrCreateByUserId(userId: string): Promise<CartEntity> {
     const cart = await this.findByUserId(userId);
+
     if (cart) {
       return cart;
     }
+
     return this.createByUserId(userId);
   }
 
@@ -48,10 +53,12 @@ export class CartService {
   ): Promise<CartEntity> {
     const cart = await this.findOrCreateByUserId(userId);
 
+    const product = await this.findOrCreateProduct(payload.product);
+
     let cartItem = await this.cartItemRepository.findOne({
       where: {
         cart_id: cart.id,
-        product_id: payload.product.id,
+        product_id: product.id,
       },
     });
 
@@ -80,5 +87,19 @@ export class CartService {
     if (cart) {
       await this.cartRepository.remove(cart);
     }
+  }
+
+  private async findOrCreateProduct(payload: Product): Promise<ProductEntity> {
+    const foundedProduct = await this.productRepository.findOne({
+      where: { id: payload.id },
+    });
+
+    if (foundedProduct) {
+      return foundedProduct;
+    }
+
+    const newProduct = this.productRepository.create(payload);
+
+    return await this.productRepository.save(newProduct);
   }
 }
