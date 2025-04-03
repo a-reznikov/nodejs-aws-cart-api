@@ -84,8 +84,10 @@ export class CartService {
 
   async removeByUserId(userId: string): Promise<void> {
     const cart = await this.findByUserId(userId);
+
     if (cart) {
-      await this.cartRepository.remove(cart);
+      await this.cartItemRepository.delete({ cart_id: cart.id });
+      await this.cartRepository.delete(cart.id);
     }
   }
 
