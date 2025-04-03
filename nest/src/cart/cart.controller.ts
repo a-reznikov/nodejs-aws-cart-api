@@ -60,8 +60,8 @@ export class CartController {
   @UseGuards(BasicAuthGuard)
   @Delete()
   @HttpCode(HttpStatus.OK)
-  clearUserCart(@Req() req: AppRequest) {
-    this.cartService.removeByUserId(getUserIdFromRequest(req));
+  async clearUserCart(@Req() req: AppRequest) {
+    await this.cartService.removeByUserId(getUserIdFromRequest(req));
   }
 
   // @UseGuards(JwtAuthGuard)
@@ -77,6 +77,7 @@ export class CartController {
 
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(items);
+
     const order = this.orderService.create({
       userId,
       cartId,
@@ -87,6 +88,7 @@ export class CartController {
       address: body.address,
       total,
     });
+
     this.cartService.removeByUserId(userId);
 
     return {
@@ -96,7 +98,7 @@ export class CartController {
 
   @UseGuards(BasicAuthGuard)
   @Get('order')
-  getOrder(): Order[] {
-    return this.orderService.getAll();
+  async getOrder(): Promise<Order[]> {
+    return await this.orderService.getAll();
   }
 }

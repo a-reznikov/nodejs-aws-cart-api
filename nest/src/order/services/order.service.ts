@@ -7,15 +7,15 @@ import { CreateOrderPayload, OrderStatus } from '../type';
 export class OrderService {
   private orders: Record<string, Order> = {};
 
-  getAll() {
+  async getAll(): Promise<Order[]> {
     return Object.values(this.orders);
   }
 
-  findById(orderId: string): Order {
+  async findById(orderId: string): Promise<Order> {
     return this.orders[orderId];
   }
 
-  create(data: CreateOrderPayload) {
+  async create(data: CreateOrderPayload): Promise<Order> {
     const id = randomUUID() as string;
     const order: Order = {
       id,
@@ -35,8 +35,8 @@ export class OrderService {
   }
 
   // TODO add  type
-  update(orderId: string, data: Order) {
-    const order = this.findById(orderId);
+  async update(orderId: string, data: Order): Promise<Order> {
+    const order = await this.findById(orderId);
 
     if (!order) {
       throw new Error('Order does not exist.');
@@ -46,5 +46,7 @@ export class OrderService {
       ...data,
       id: orderId,
     };
+
+    return this.orders[orderId];
   }
 }
