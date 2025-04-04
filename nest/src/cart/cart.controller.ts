@@ -11,17 +11,21 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   UseInterceptors,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../auth';
 import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
-import { CreateOrderDto, PutCartPayload } from 'src/order/type';
+import { CreateOrderDto } from 'src/order/type';
 import { CartItemEntity } from './entities/cart-item.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
+import { UpdateCartDto } from './dto/update-cart.dto';
 
 @Controller('api/profile/cart')
+@UsePipes(new ValidationPipe({ transform: true }))
 export class CartController {
   constructor(
     private cartService: CartService,
@@ -40,15 +44,18 @@ export class CartController {
     return cart.items.map((item) => new CartItemEntity(item));
   }
 
-  // @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(BasicAuthGuard)
   @Put()
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  )
   async updateUserCart(
     @Req() req: AppRequest,
-    @Body() body: PutCartPayload,
+    @Body() body: UpdateCartDto,
   ): Promise<CartItemEntity[]> {
-    // TODO: validate body payload...
     const cart = await this.cartService.updateByUserId(
       getUserIdFromRequest(req),
       body,
