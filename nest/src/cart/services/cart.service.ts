@@ -104,4 +104,8 @@ export class CartService {
 
     return await this.productRepository.save(newProduct);
   }
+
+  async updateCartStatus(cartId: string, status: CartStatuses): Promise<void> {
+    await this.cartRepository.update(cartId, { status });
+  }
 }

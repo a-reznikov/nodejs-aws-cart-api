@@ -1,52 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-import { Order } from '../models';
-import { CreateOrderPayload, OrderStatus } from '../type';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { OrderEntity } from '../entities/order.entity';
+import { OrderStatus } from '../type';
+import { CreateOrderPayload } from '../type';
 
 @Injectable()
 export class OrderService {
-  private orders: Record<string, Order> = {};
+  constructor(
+    @InjectRepository(OrderEntity)
+    private orderRepository: Repository<OrderEntity>,
+  ) {}
 
-  async getAll(): Promise<Order[]> {
-    return Object.values(this.orders);
+  async getAll(): Promise<OrderEntity[]> {
+    return this.orderRepository.find();
   }
 
-  async findById(orderId: string): Promise<Order> {
-    return this.orders[orderId];
+  async findById(orderId: string): Promise<OrderEntity> {
+    return this.orderRepository.findOne({ where: { id: orderId } });
   }
 
-  async create(data: CreateOrderPayload): Promise<Order> {
-    const id = randomUUID() as string;
-    const order: Order = {
-      id,
+  async create(data: CreateOrderPayload): Promise<OrderEntity> {
+    const order = this.orderRepository.create({
       ...data,
-      statusHistory: [
-        {
-          comment: '',
-          status: OrderStatus.Open,
-          timestamp: Date.now(),
-        },
-      ],
-    };
+      status: OrderStatus.OPEN,
+    });
 
-    this.orders[id] = order;
-
-    return order;
+    return this.orderRepository.save(order);
   }
 
-  // TODO add  type
-  async update(orderId: string, data: Order): Promise<Order> {
+  async update(
+    orderId: string,
+    data: Partial<OrderEntity>,
+  ): Promise<OrderEntity> {
     const order = await this.findById(orderId);
 
     if (!order) {
       throw new Error('Order does not exist.');
     }
 
-    this.orders[orderId] = {
-      ...data,
-      id: orderId,
-    };
-
-    return this.orders[orderId];
+    const updatedOrder = this.orderRepository.merge(order, data);
+    return this.orderRepository.save(updatedOrder);
   }
 }

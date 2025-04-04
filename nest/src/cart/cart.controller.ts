@@ -13,12 +13,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../auth';
-import { Order, OrderService } from '../order';
+import { DEFAULT_PAYMENT, OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
 import { CreateOrderDto, PutCartPayload } from 'src/order/type';
 import { CartItemEntity } from './entities/cart-item.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
+import { CartStatuses } from './models';
 
 @Controller('api/profile/cart')
 export class CartController {
@@ -66,8 +68,11 @@ export class CartController {
 
   // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
-  @Put('order')
-  async checkout(@Req() req: AppRequest, @Body() body: CreateOrderDto) {
+  @Put('checkout')
+  async checkout(
+    @Req() req: AppRequest,
+    @Body() body: CreateOrderDto,
+  ): Promise<OrderEntity> {
     const userId = getUserIdFromRequest(req);
     const cart = await this.cartService.findByUserId(userId);
 
@@ -78,27 +83,23 @@ export class CartController {
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(items);
 
-    const order = this.orderService.create({
-      userId,
-      cartId,
-      items: items.map(({ product, count }) => ({
-        productId: product.id,
-        count,
-      })),
-      address: body.address,
+    const order = await this.orderService.create({
+      user_id: userId,
+      cart_id: cartId,
+      delivery: body.address,
+      comments: body.address.comment,
+      payment: DEFAULT_PAYMENT,
       total,
     });
 
-    this.cartService.removeByUserId(userId);
+    await this.cartService.updateCartStatus(cartId, CartStatuses.ORDERED);
 
-    return {
-      order,
-    };
+    return order;
   }
 
   @UseGuards(BasicAuthGuard)
   @Get('order')
-  async getOrder(): Promise<Order[]> {
+  async getOrder(): Promise<OrderEntity[]> {
     return await this.orderService.getAll();
   }
 }
