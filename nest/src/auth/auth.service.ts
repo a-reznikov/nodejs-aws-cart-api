@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/services/users.service';
 import { User } from '../users/models';
 import { UserEntity } from '../users/entities/user.entity';
+import { UserRegisterDto } from './dto/register.dto';
 // import { contentSecurityPolicy } from 'helmet';
 type TokenResponse = {
   token_type: string;
@@ -16,7 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(payload: User) {
+  async register(payload: UserRegisterDto) {
     const user = await this.usersService.findOne(payload.name);
 
     if (user) {
@@ -48,7 +49,6 @@ export class AuthService {
     user: User,
     type: 'jwt' | 'basic' | 'default',
   ): Promise<TokenResponse> {
-    console.log({ user, type });
     const LOGIN_MAP = {
       jwt: this.loginJWT,
       basic: this.loginBasic,

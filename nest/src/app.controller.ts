@@ -7,15 +7,12 @@ import {
   HttpStatus,
   Body,
   HttpCode,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
-import {
-  LocalAuthGuard,
-  AuthService,
-  // JwtAuthGuard,
-  BasicAuthGuard,
-} from './auth';
-import { User } from './users';
+import { AuthService, BasicAuthGuard, LocalAuthGuard } from './auth';
 import { AppRequest } from './shared';
+import { UserRegisterDto } from './auth/dto/register.dto';
 
 @Controller()
 export class AppController {
@@ -31,10 +28,8 @@ export class AppController {
 
   @Post('api/auth/register')
   @HttpCode(HttpStatus.CREATED)
-  // TODO ADD validation
-  async register(@Body() body: User) {
-    console.log('Registering user', body);
-
+  @UsePipes(new ValidationPipe())
+  async register(@Body() body: UserRegisterDto) {
     return this.authService.register(body);
   }
 
