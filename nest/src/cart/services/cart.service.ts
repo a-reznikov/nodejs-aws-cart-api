@@ -21,7 +21,7 @@ export class CartService {
 
   async findByUserId(userId: string): Promise<CartEntity> {
     return this.cartRepository.findOne({
-      where: { user_id: userId },
+      where: { user_id: userId, status: CartStatuses.OPEN },
       relations: ['items', 'items.product'],
     });
   }

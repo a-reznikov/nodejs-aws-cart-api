@@ -95,7 +95,7 @@ export class CartController {
 
     await this.cartService.updateCartStatus(cartId, CartStatuses.ORDERED);
 
-    return order;
+    return await this.orderService.findById(order.id);
   }
 
   @UseGuards(BasicAuthGuard)

@@ -1,4 +1,4 @@
-import { Address, OrderStatus, Payment } from '../type';
+import { Address, OrderStatus } from '../type';
 
 export type Order = {
   id?: string;
@@ -11,8 +11,4 @@ export type Order = {
     timestamp: number;
     comment: string;
   }>;
-};
-
-export const DEFAULT_PAYMENT: Payment = {
-  type: 'credit_card',
 };
