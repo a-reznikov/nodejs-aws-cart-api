@@ -19,10 +19,10 @@ import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
-import { CreateOrderDto } from 'src/order/type';
 import { CartItemEntity } from './entities/cart-item.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { CheckoutDto } from './dto/checkout.dto';
 
 @Controller('api/profile/cart')
 @UsePipes(new ValidationPipe({ transform: true }))
@@ -72,12 +72,12 @@ export class CartController {
     await this.cartService.removeByUserId(getUserIdFromRequest(req));
   }
 
-  // @UseGuards(JwtAuthGuard)
   @UseGuards(BasicAuthGuard)
   @Put('checkout')
+  @UsePipes(new ValidationPipe())
   async checkout(
     @Req() req: AppRequest,
-    @Body() body: CreateOrderDto,
+    @Body() body: CheckoutDto,
   ): Promise<OrderEntity> {
     const userId = getUserIdFromRequest(req);
     const cart = await this.cartService.findByUserId(userId);
