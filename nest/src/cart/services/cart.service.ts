@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { CartEntity } from '../entities/cart.entity';
 import { CartItemEntity } from '../entities/cart-item.entity';
 import { randomUUID } from 'node:crypto';
 import { CartStatuses, Product } from '../models';
-import { PutCartPayload } from 'src/order/type';
+import { OrderStatus, PutCartPayload } from 'src/order/type';
 import { ProductEntity } from '../entities/product.entity';
+import { OrderEntity } from 'src/order/entities/order.entity';
+import { CreateOrderDto } from 'src/order/type';
+import { DEFAULT_PAYMENT } from 'src/order/constants';
+import { findOrderParams } from 'src/order/constants';
 
 @Injectable()
 export class CartService {
@@ -17,6 +21,7 @@ export class CartService {
     private readonly cartItemRepository: Repository<CartItemEntity>,
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findByUserId(userId: string): Promise<CartEntity> {
@@ -107,5 +112,48 @@ export class CartService {
 
   async updateCartStatus(cartId: string, status: CartStatuses): Promise<void> {
     await this.cartRepository.update(cartId, { status });
+  }
+
+  async checkout(data: {
+    userId: string;
+    cartId: string;
+    total: number;
+    body: CreateOrderDto;
+  }): Promise<OrderEntity> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const order = await queryRunner.manager.save(OrderEntity, {
+        user_id: data.userId,
+        cart_id: data.cartId,
+        delivery: data.body.address,
+        comments: data.body.address.comment,
+        payment: DEFAULT_PAYMENT,
+        total: data.total,
+        status: OrderStatus.OPEN,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      await queryRunner.manager.update(CartEntity, data.cartId, {
+        status: CartStatuses.ORDERED,
+        updated_at: new Date(),
+      });
+
+      await queryRunner.commitTransaction();
+
+      return await queryRunner.manager.findOne(OrderEntity, {
+        where: { id: order.id },
+        ...findOrderParams,
+      });
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

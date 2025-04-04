@@ -20,8 +20,6 @@ import { CartService } from './services';
 import { CreateOrderDto, PutCartPayload } from 'src/order/type';
 import { CartItemEntity } from './entities/cart-item.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
-import { CartStatuses } from './models';
-import { DEFAULT_PAYMENT } from 'src/order/constants';
 
 @Controller('api/profile/cart')
 export class CartController {
@@ -84,18 +82,12 @@ export class CartController {
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(items);
 
-    const order = await this.orderService.create({
-      user_id: userId,
-      cart_id: cartId,
-      delivery: body.address,
-      comments: body.address.comment,
-      payment: DEFAULT_PAYMENT,
+    return await this.cartService.checkout({
+      userId,
+      cartId,
       total,
+      body,
     });
-
-    await this.cartService.updateCartStatus(cartId, CartStatuses.ORDERED);
-
-    return await this.orderService.findById(order.id);
   }
 
   @UseGuards(BasicAuthGuard)
