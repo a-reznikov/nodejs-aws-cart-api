@@ -10,7 +10,7 @@ import { ProductEntity } from '../entities/product.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { CreateOrderDto } from 'src/order/type';
 import { DEFAULT_PAYMENT } from 'src/order/constants';
-import { findOrderParams } from 'src/order/constants';
+import { OrderService } from 'src/order/services';
 
 @Injectable()
 export class CartService {
@@ -22,6 +22,7 @@ export class CartService {
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly dataSource: DataSource,
+    private readonly orderService: OrderService,
   ) {}
 
   async findByUserId(userId: string): Promise<CartEntity> {
@@ -144,10 +145,7 @@ export class CartService {
 
       await queryRunner.commitTransaction();
 
-      return await queryRunner.manager.findOne(OrderEntity, {
-        where: { id: order.id },
-        ...findOrderParams,
-      });
+      return await this.orderService.findById(order.id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
