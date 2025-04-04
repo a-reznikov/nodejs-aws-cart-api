@@ -13,7 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../auth';
-import { DEFAULT_PAYMENT, OrderService } from '../order';
+import { OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
@@ -21,6 +21,7 @@ import { CreateOrderDto, PutCartPayload } from 'src/order/type';
 import { CartItemEntity } from './entities/cart-item.entity';
 import { OrderEntity } from 'src/order/entities/order.entity';
 import { CartStatuses } from './models';
+import { DEFAULT_PAYMENT } from 'src/order/constants';
 
 @Controller('api/profile/cart')
 export class CartController {

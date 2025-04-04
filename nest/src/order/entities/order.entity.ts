@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { CartEntity } from '../../cart/entities/cart.entity';
 import { OrderStatus } from '../type';
@@ -33,6 +35,12 @@ export class OrderEntity {
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   total: number;
+
+  @CreateDateColumn({ type: 'date' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'date' })
+  updated_at: Date;
 
   @ManyToOne(() => CartEntity)
   @JoinColumn({ name: 'cart_id' })
