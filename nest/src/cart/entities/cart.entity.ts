@@ -3,8 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 import { CartItemEntity } from './cart-item.entity';
 import { CartStatuses } from '../models';
@@ -17,10 +17,10 @@ export class CartEntity {
   @Column({ type: 'uuid', nullable: false })
   user_id: string;
 
-  @CreateDateColumn({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: false })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'date', nullable: false })
+  @Column({ type: 'date', nullable: false })
   updated_at: Date;
 
   @Column({
@@ -33,4 +33,16 @@ export class CartEntity {
 
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart)
   items: CartItemEntity[];
+
+  @BeforeInsert()
+  updateDates() {
+    const date = new Date();
+    this.created_at = date;
+    this.updated_at = date;
+  }
+
+  @BeforeUpdate()
+  updateUpdatedAt() {
+    this.updated_at = new Date();
+  }
 }

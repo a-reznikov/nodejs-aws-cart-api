@@ -33,6 +33,12 @@ import { UserEntity } from './users/entities/user.entity';
           UserEntity,
         ],
         synchronize: false,
+        logging: true,
+        retryAttempts: 3,
+        retryDelay: 3000,
+        ssl: {
+          rejectUnauthorized: false,
+        },
       }),
       inject: [ConfigService],
     }),

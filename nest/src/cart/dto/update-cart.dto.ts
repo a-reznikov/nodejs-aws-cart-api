@@ -31,6 +31,6 @@ export class UpdateCartDto {
   product: ProductDto;
 
   @IsNumber()
-  @Min(1)
+  @Min(0)
   count: number;
 }
