@@ -22,6 +22,22 @@ module.exports = function (options, webpack) {
       }
     },
 
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                transpileOnly: true,
+              }
+            }
+          ]
+        }
+      ]
+    },
+
     plugins: [
       ...options.plugins,
       new webpack.IgnorePlugin({

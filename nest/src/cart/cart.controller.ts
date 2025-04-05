@@ -20,7 +20,7 @@ import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
 import { CartItemEntity } from './entities/cart-item.entity';
-import { OrderEntity } from 'src/order/entities/order.entity';
+import { OrderEntity } from '../order/entities/order.entity';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { CheckoutDto } from './dto/checkout.dto';
 

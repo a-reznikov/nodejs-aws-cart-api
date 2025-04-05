@@ -5,12 +5,11 @@ import { CartEntity } from '../entities/cart.entity';
 import { CartItemEntity } from '../entities/cart-item.entity';
 import { randomUUID } from 'node:crypto';
 import { CartStatuses, Product } from '../models';
-import { OrderStatus, PutCartPayload } from 'src/order/type';
+import { OrderStatus, PutCartPayload, CreateOrderDto } from '../../order/type';
 import { ProductEntity } from '../entities/product.entity';
-import { OrderEntity } from 'src/order/entities/order.entity';
-import { CreateOrderDto } from 'src/order/type';
-import { DEFAULT_PAYMENT } from 'src/order/constants';
-import { OrderService } from 'src/order/services';
+import { OrderEntity } from '../../order/entities/order.entity';
+import { DEFAULT_PAYMENT } from '../../order/constants';
+import { OrderService } from '../../order/services';
 
 @Injectable()
 export class CartService {
