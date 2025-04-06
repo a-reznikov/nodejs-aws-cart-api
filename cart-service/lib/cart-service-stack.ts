@@ -42,7 +42,7 @@ export class AReznikovCartServiceStack extends cdk.Stack {
         POSTGRES_PASSWORD: postgresPassword,
         POSTGRES_DATABASE: postgresDatabase,
       },
-      timeout: cdk.Duration.seconds(3),
+      timeout: cdk.Duration.seconds(15),
     });
 
     new apigateway.LambdaRestApi(this, "AReznikovCartApiGateway", {

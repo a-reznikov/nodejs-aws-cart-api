@@ -10,6 +10,7 @@ import { CartItemEntity } from './cart/entities/cart-item.entity';
 import { ProductEntity } from './cart/entities/product.entity';
 import { OrderEntity } from './order/entities/order.entity';
 import { UserEntity } from './users/entities/user.entity';
+import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 @Module({
   imports: [
@@ -18,28 +19,41 @@ import { UserEntity } from './users/entities/user.entity';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('POSTGRES_HOST'),
-        port: configService.get('POSTGRES_PORT'),
-        username: configService.get('POSTGRES_USERNAME'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_DATABASE'),
-        entities: [
-          CartEntity,
-          CartItemEntity,
-          ProductEntity,
-          OrderEntity,
-          UserEntity,
-        ],
-        synchronize: false,
-        logging: true,
-        retryAttempts: 3,
-        retryDelay: 3000,
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        console.log('Starting TypeORM configuration...');
+        const startTime = Date.now();
+
+        const config: PostgresConnectionOptions = {
+          type: 'postgres',
+          host: configService.get('POSTGRES_HOST'),
+          port: configService.get('POSTGRES_PORT'),
+          username: configService.get('POSTGRES_USERNAME'),
+          password: configService.get('POSTGRES_PASSWORD'),
+          database: configService.get('POSTGRES_DATABASE'),
+          entities: [
+            CartEntity,
+            CartItemEntity,
+            ProductEntity,
+            OrderEntity,
+            UserEntity,
+          ],
+          synchronize: false,
+          logging: false,
+          extra: {
+            max: 5,
+            connectionTimeoutMillis: 2000,
+            statement_timeout: 2000,
+          },
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        };
+
+        console.log(
+          `TypeORM configuration completed in ${Date.now() - startTime}ms`,
+        );
+        return config;
+      },
       inject: [ConfigService],
     }),
     AuthModule,
