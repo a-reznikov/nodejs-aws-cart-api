@@ -6,11 +6,11 @@ const lazyImports = [
 module.exports = function (options, webpack) {
   return {
     ...options,
-    entry: ['./src/lambda.ts'],
+    entry: ['./src/main.ts'],
     externals: [],
     output: {
       ...options.output,
-      filename: 'lambda.js',
+      filename: 'main.js',
       libraryTarget: 'commonjs2',
     },
     plugins: [
