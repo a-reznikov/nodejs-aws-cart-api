@@ -1,0 +1,47 @@
+# Node.js dependencies
+
+node_modules/ # NPM packages - will be reinstalled inside Docker
+npm-debug.log # NPM debug logs
+
+# Build outputs
+
+dist/ # Built application - will be rebuilt inside Docker
+
+# Environment and configuration
+
+.env # Environment variables - should be provided at runtime
+.env.\* # Environment variables for different environments
+env.example # Example environment file
+
+# Version control
+
+.git/ # Git repository data
+.gitignore # Git ignore file
+
+# IDE files
+
+.vscode/ # VS Code settings
+
+# Docker files
+
+Dockerfile # This Dockerfile
+.dockerignore # This file
+
+# Testing
+
+test/ # Test directory - not needed in production
+coverage/ # Test coverage reports
+**/\*.spec.ts # Test files
+**/\*.test.ts # Test files
+jest.config.js # Jest configuration
+
+# Additional project files not needed in Docker
+
+\*.md # Markdown files like README.md
+.eslintrc.js # ESLint configuration
+.prettierrc # Prettier configuration
+tsconfig.build.json # TypeScript build config - used during build process only
+webpack.config.js # Webpack config - used during build process only
+get-token.sh # Utility script not needed in container
+db/ # Database scripts/migrations
+nest-cli.json # Nest CLI config - used during development only
